@@ -1,6 +1,6 @@
 //package banking;
 
- package com.kabir.milton;
+package com.kabir.milton;
 
 import java.util.*;
 
@@ -36,19 +36,45 @@ public class Main {
                 String st;
                 while(true){
                     st="";
-                    for(int i=0;i<10;i++){
+                    for(int i=0;i<9;i++){
                         Collections.shuffle(list);
                         st+=Integer.toString(list.get(0));
                     }
-                    if(!cardList.containsKey(cc+st)){
-                        cardList.put(cc+st,pp);
-                        acBal.put(cc+st,0);
+                    String ab=cc+st;
+//                    ab="400000748954886";
+
+                    int xy=0;
+                    for(int i=0;i<ab.length();i++){
+                        int yz=Integer.parseInt(ab.substring(i,i+1));
+                        if((i+1)%2==1){
+                            yz*=2;
+                        }
+                        if(yz>9){
+                            yz-=9;
+                        }
+//                        System.out.println(yz);
+                        xy+=yz;
+                    }
+//                    System.out.println("-->"+xy);
+                    int xx=0;
+                    for(int i=10;i<=90;i+=10){
+                        if(i>=xy){
+                            xx=i-xy;
+                            break;
+                        }
+                    }
+
+                    ab+=Integer.toString(xx);
+                    st=ab;
+                    if(!cardList.containsKey(st)){
+                        cardList.put(st,pp);
+                        acBal.put(st,0);
                         break;
                     }
                 }
                 System.out.println("Your card has been created");
                 System.out.println("Your card number:");
-                System.out.println(cc+st);
+                System.out.println(st);
                 System.out.println("Your card PIN:");
                 System.out.println(pp);
             }
