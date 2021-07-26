@@ -1,8 +1,94 @@
-package com.kabir.milton;
+//package banking;
+
+ package com.kabir.milton;
+
+import java.util.*;
 
 public class Main {
 
     public static void main(String[] args) {
-	// write your code here
+        // write your code here
+        Scanner sc=new Scanner(System.in);
+        HashMap<String, String> cardList = new HashMap<>();
+        HashMap<String, Integer> acBal = new HashMap<>();
+        while(true){
+            System.out.println("1. Create an account\n" +
+                    "2. Log into account\n" +
+                    "0. Exit");
+            String ssd=sc.nextLine();
+            int tt=Integer.parseInt(ssd);
+            if(tt==0){
+                System.out.println("Bye!");
+                break;
+            }
+            if(tt==1){
+                String cc="400000";
+                String pp="";
+                List<Integer> list = new ArrayList<>();
+                for(int i=0;i<10;i++){
+                    list.add(i);
+                }
+
+                for(int i=0;i<4;i++){
+                    Collections.shuffle(list);
+                    pp+=Integer.toString(list.get(0));
+                }
+                String st;
+                while(true){
+                    st="";
+                    for(int i=0;i<10;i++){
+                        Collections.shuffle(list);
+                        st+=Integer.toString(list.get(0));
+                    }
+                    if(!cardList.containsKey(cc+st)){
+                        cardList.put(cc+st,pp);
+                        acBal.put(cc+st,0);
+                        break;
+                    }
+                }
+                System.out.println("Your card has been created");
+                System.out.println("Your card number:");
+                System.out.println(cc+st);
+                System.out.println("Your card PIN:");
+                System.out.println(pp);
+            }
+            else{
+                System.out.println("Enter your card number:");
+                String ac=sc.nextLine();
+                System.out.println("Enter your PIN:");
+                String pp=sc.nextLine();
+                int ck=0;
+                for(Map.Entry m:cardList.entrySet()){
+                    if(ac.equals(m.getKey())&&pp.equals(m.getValue())){
+                        ck=1;
+                        break;
+                    }
+                }
+                if(ck==0){
+                    System.out.println("Wrong card number or PIN!");
+                    continue;
+                }
+                System.out.println("You have successfully logged in!");
+                while(true){
+                    System.out.println("1. Balance\n" +
+                            "2. Log out\n" +
+                            "0. Exit");
+                    String aab=sc.nextLine();
+                    int aa=Integer.parseInt(aab);
+                    if(aa==0){
+                        break;
+                    }
+                    if(aa==1){
+                        System.out.println("Balance: "+acBal.get(ac));
+                    }
+                    else{
+                        System.out.println("You have successfully logged out!");
+                        break;
+                    }
+                }
+
+            }
+
+        }
     }
 }
