@@ -98,6 +98,25 @@ class AccountDB {
 
     }
 
+    public void increaseBalance(int amount, String cardNumber) {
+        String updateAccount = "UPDATE card SET balance = balance + " + amount + " WHERE number = '" + cardNumber + "'";
+        try (Connection conn = this.connect();
+             Statement stmt = conn.createStatement()) {
+            stmt.execute(updateAccount);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    protected void removeAccount(String cardNumber) {
+        String deletingAccount = "DELETE FROM card WHERE number = '" + cardNumber + "';";
+
+        try (Connection conn = connect(); Statement stmt = conn.createStatement()) {
+            stmt.execute(deletingAccount);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     public void displayTable() {
         String selectAll = "SELECT * FROM card;";
         try (Connection conn = this.connect();
@@ -210,7 +229,9 @@ public class Main {
                 System.out.println("You have successfully logged in!");
                 while(true){
                     System.out.println("1. Balance\n" +
-                            "2. Log out\n" +
+                            "2. Add income\n" +
+                            "3. Close account\n" +
+                            "5. Log out\n" +
                             "0. Exit");
                     String aab=sc.nextLine();
                     int aa=Integer.parseInt(aab);
@@ -220,7 +241,24 @@ public class Main {
                     if(aa==1){
                         ops.printBalance(ac, pp);
                     }
-                    else{
+                    else if(aa==2){
+                        System.out.println("Enter income:");
+                        int amount=Integer.parseInt(sc.nextLine());
+                        ops.increaseBalance(amount,ac);
+                        System.out.println("Income was added!");
+                    }
+                    else if(aa==3){
+                        System.out.print("Transfer\n" +
+                                "Enter card number:\n");
+                        String recp=sc.nextLine();
+
+                    }
+                    else if(aa==4){
+                        ops.removeAccount(ac);
+                        System.out.println("The account has been closed!");
+                        break;
+                    }
+                    else if(aa==5){
                         System.out.println("You have successfully logged out!");
                         break;
                     }
