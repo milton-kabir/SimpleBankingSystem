@@ -1,9 +1,91 @@
 //package banking;
 
-package com.kabir.milton;
+ package com.kabir.milton;
 
+import org.sqlite.SQLiteDataSource;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
+class CardDatabase {
+    private String[] args;
+    private String fileName;
+    SQLiteDataSource dataSource = new SQLiteDataSource();
 
+
+    public void setArgs(String[] args) {
+        this.args = args;
+        extractFilePath();
+    }
+    public void extractFilePath() {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-fileName") && args.length >= i + 2) {
+                fileName = args[i + 1];
+            }
+        }
+//        dataSource.setUrl("jdbc:sqlite:" + fileName);
+        dataSource.setUrl("jdbc:sqlite:C:\\sqlite3\\db\\" + fileName);
+    }
+    public boolean cardExists(String cardNo) {
+        int id = -1;
+        try (Connection con = dataSource.getConnection()) {
+            try (Statement statement = con.createStatement()) {
+                try (ResultSet existing = statement.executeQuery("SELECT id FROM card WHERE "
+                        + "number = \"" + cardNo + "\";")) {
+                    while (existing.next()) {
+                        id = existing.getInt("id");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return id != -1;
+    }
+    public void addCard(String cardNo, String pin) {
+        try (Connection con = dataSource.getConnection()) {
+            try (Statement statement = con.createStatement()) {
+                statement.executeUpdate(String.format("INSERT INTO card (number, pin) VALUES " +
+                        "(\"%s\", \"%s\");", cardNo, pin));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public boolean checkLogIn(String acc, String pin) {
+        try (Connection con = dataSource.getConnection()) {
+            try (Statement statement = con.createStatement()) {
+                try (ResultSet pinMatch = statement.executeQuery("SELECT pin FROM card WHERE "
+                        + "number = \"" + acc + "\";")) {
+                    while (pinMatch.next()) {
+                        if (pin.equals(pinMatch.getString("pin"))) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    public int balance(String acc) {
+        int bal = 0;
+        try (Connection con = dataSource.getConnection()) {
+            try (Statement statement = con.createStatement()) {
+                try (ResultSet balance = statement.executeQuery("SELECT balance FROM card WHERE "
+                        + "number = \"" + acc + "\";")) {
+                    bal =  balance.getInt("balance");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return bal;
+    }
+}
 public class Main {
 
     public static void main(String[] args) {
@@ -11,6 +93,8 @@ public class Main {
         Scanner sc=new Scanner(System.in);
         HashMap<String, String> cardList = new HashMap<>();
         HashMap<String, Integer> acBal = new HashMap<>();
+        CardDatabase cardDb = new CardDatabase();
+        cardDb.setArgs(args);
         while(true){
             System.out.println("1. Create an account\n" +
                     "2. Log into account\n" +
@@ -66,11 +150,15 @@ public class Main {
 
                     ab+=Integer.toString(xx);
                     st=ab;
-                    if(!cardList.containsKey(st)){
-                        cardList.put(st,pp);
-                        acBal.put(st,0);
+                    if (!cardDb.cardExists(st.toString())) {
+                        cardDb.addCard(st.toString(), pp);
                         break;
                     }
+//                    if(!cardList.containsKey(st)){
+//                        cardList.put(st,pp);
+//                        acBal.put(st,0);
+//                        break;
+//                    }
                 }
                 System.out.println("Your card has been created");
                 System.out.println("Your card number:");
@@ -83,38 +171,32 @@ public class Main {
                 String ac=sc.nextLine();
                 System.out.println("Enter your PIN:");
                 String pp=sc.nextLine();
-                int ck=0;
-                for(Map.Entry m:cardList.entrySet()){
-                    if(ac.equals(m.getKey())&&pp.equals(m.getValue())){
-                        ck=1;
-                        break;
+                if(cardDb.checkLogIn(ac, pp)){
+                    System.out.println("You have successfully logged in!");
+                    while (true){
+                        System.out.println("1. Balance\n" +
+                                "2. Log out\n" +
+                                "0. Exit");
+                        String aab=sc.nextLine();
+                        int aa=Integer.parseInt(aab);
+                        if(aa==0){
+                            break;
+                        }
+                        if(aa==1){
+                            System.out.println("Balance: "+cardDb.balance(ac));
+                        }
+                        else{
+                            System.out.println("You have successfully logged out!");
+                            break;
+                        }
+
                     }
                 }
-                if(ck==0){
+                else{
                     System.out.println("Wrong card number or PIN!");
                     continue;
                 }
-                System.out.println("You have successfully logged in!");
-                while(true){
-                    System.out.println("1. Balance\n" +
-                            "2. Log out\n" +
-                            "0. Exit");
-                    String aab=sc.nextLine();
-                    int aa=Integer.parseInt(aab);
-                    if(aa==0){
-                        break;
-                    }
-                    if(aa==1){
-                        System.out.println("Balance: "+acBal.get(ac));
-                    }
-                    else{
-                        System.out.println("You have successfully logged out!");
-                        break;
-                    }
-                }
-
             }
-
         }
     }
 }
